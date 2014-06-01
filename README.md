@@ -1,4 +1,3 @@
 SearchEngine
 ============
-
-A search engine application mad in Java during a degree course
+Creating a search engine as part of a 'Indexing information' course.
