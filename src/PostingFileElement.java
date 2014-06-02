@@ -1,4 +1,5 @@
 //This class represents a line in the postings file table. 
+//every line is path of File and document number
 public class PostingFileElement {
 	private String m_path;
 	private int m_docNum;

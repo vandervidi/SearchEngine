@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +12,16 @@ import java.util.List;
 
 
 public class FolderScanner implements Runnable{
+	private  MysqlConnector ms;
+	
+
+	public FolderScanner() {
+		super();
+		ms = new MysqlConnector();
+	}
+
 	//initializing Posting File structure
 	List <PostingFileElement> postingFile = new ArrayList<>();
-	List <IndexFileElement> indexFile = new ArrayList<>();
 
 	@Override
 	public void run() {
@@ -102,20 +110,49 @@ public class FolderScanner implements Runnable{
 		words = everything.split(" ");
 		for(String tmpWord : words){
 			tmpWord.trim();
-			if (tmpWord.equals("")){	//Makes sure we dont add empty words to the index file
-				continue;
-			}
-			else{
-				indexFile.add(new IndexFileElement(tmpWord.toLowerCase(), docNum));
+			if (!tmpWord.equals("")){	//Makes sure we dont add empty words to the index file
+
+				//if the word+docNumber does not exist
+				//insert into the mysql table
+				try {
+					ms.insert(tmpWord, docNum , 1);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Error inserting ");
+					e.printStackTrace();
+				}
+//				if (blabla){
+//					
+//				}else{	// else increment frequency
+//					
+//				}
 			}
 		}
 		//Sorting the index file by an alfabetic order
-		Collections.sort(indexFile);
+		try {
+			ms.sortByWord();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			if (ms.statement!= null)
+				try {
+					ms.statement.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			e.printStackTrace();
+		}
+		
+		//sort mysql table
+		
+		
 		//Removing duplicates from the index file
-		indexFile = removeDuplicates(indexFile);
-		System.out.println(indexFile.toString());
-	}
+		
 
+		
+		
+	}
+/*
 	private List<IndexFileElement> removeDuplicates(List<IndexFileElement> indexFile) {
 		List<IndexFileElement> tmpIndexFile = new ArrayList<IndexFileElement>();
 		boolean added = false;
@@ -142,7 +179,17 @@ public class FolderScanner implements Runnable{
 	
 		return tmpIndexFile;
 	}
-}
 
+
+*/	
 	
+	public MysqlConnector getMs() {
+		return ms;
+	}
 
+	public void setMs(MysqlConnector ms) {
+		this.ms = ms;
+	}
+	
+	
+}
