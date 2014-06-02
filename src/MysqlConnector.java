@@ -69,6 +69,32 @@ public class MysqlConnector {
 		statement.execute(
 				"ALTER TABLE `indexFile` ORDER BY word ASC;"
 				);
-        statement.close() ;   
+        statement.close();   
+	}
+	
+	
+	public void removeDuplicate() throws SQLException {
+		statement = connection.createStatement();
+		statement.executeUpdate(
+				"CREATE temporary TABLE tsum AS"  
+				+"		SELECT word, docNumber, SUM(freq) as freq "
+				+"		FROM indexfile group by word, docNumber;"
+				);
+
+		statement.executeUpdate("TRUNCATE TABLE indexFile;");
+		
+		statement.executeUpdate(
+				"INSERT INTO indexFile (`word`,`docNumber`,`freq`)"
+				+"		SELECT word,docNumber,freq"
+				+"		FROM tsum;"
+				);
+		
+		statement.executeUpdate(
+				"DROP TEMPORARY TABLE IF EXISTS tsum;"
+				);
+		
+
+        statement.close();  
+        System.out.println("close-statement");
 	}
 }

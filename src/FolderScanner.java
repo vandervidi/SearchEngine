@@ -143,11 +143,21 @@ public class FolderScanner implements Runnable{
 			e.printStackTrace();
 		}
 		
-		//sort mysql table
-		
 		
 		//Removing duplicates from the index file
-		
+		try {
+			ms.removeDuplicate();
+			System.out.println("build index completed.");
+		} catch (SQLException e) {
+			if (ms.statement!= null)
+				try {
+					ms.statement.close();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			e.printStackTrace();
+		}
 
 		
 		
