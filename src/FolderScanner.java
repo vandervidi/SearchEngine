@@ -14,7 +14,7 @@ public class FolderScanner implements Runnable{
 	
 	private FolderScanner() {
 		super();
-		ms = new MysqlConnector();
+		ms = MysqlConnector.getInstance();
 	}
 
 	//initializing Posting File structure

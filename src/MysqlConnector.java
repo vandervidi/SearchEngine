@@ -10,11 +10,13 @@ import java.sql.Statement;
  */
 
 public class MysqlConnector {
+	private static final MysqlConnector INSTANCE = new MysqlConnector();
+
 	Connection connection  = null;
 	Statement statement = null;
 	
 	
-	public MysqlConnector() {
+	private MysqlConnector() {
 		try {
 			//initializing connection to the database
 			Class.forName("com.mysql.jdbc.Driver");
@@ -34,6 +36,10 @@ public class MysqlConnector {
 			e.printStackTrace();
 		}
 	}
+	//getter for MysqlConnecor instance
+	public static MysqlConnector getInstance() {
+        return INSTANCE;
+    }
 	
 	//This function creates,if doesnt exits, a new 'index File' table
 	public void initTable(){
