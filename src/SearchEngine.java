@@ -8,7 +8,7 @@ public class SearchEngine {
 	
 		// TODO Auto-generated method stub
 		
-		FolderScanner fs = new FolderScanner();
+		FolderScanner fs = FolderScanner.getInstance();
 		fs.run();
 		
 		

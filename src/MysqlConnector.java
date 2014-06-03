@@ -4,27 +4,39 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/* This class is responsible for:
+ * 1.Initializing a connection to the MySQL server
+ * 2.Manages functionality on the 'index file' table 
+ */
 
 public class MysqlConnector {
-
 	Connection connection  = null;
 	Statement statement = null;
 	
 	
 	public MysqlConnector() {
 		try {
+			//initializing connection to the database
 			Class.forName("com.mysql.jdbc.Driver");
+			
+			//Vidrans connection
+			connection = DriverManager.getConnection(
+					"jdbc:mysql://localhost/searchengine", "root", "");
+			
+			/* Ofirs connection
 			connection = DriverManager.getConnection(
 					"jdbc:mysql://localhost/searchengine", "jaja", "gaga");
+			*/
+			
+			//creating the 'index file' table
 			initTable();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	
+	//This function creates,if doesnt exits, a new 'index File' table
 	public void initTable(){
-		//Create index table statement
         String createIndexTable = "CREATE TABLE indexFile ("
                                 +"        word VARCHAR(30) NOT NULL, "
                                 +"        docNumber INT(4) NOT NULL, "
@@ -33,23 +45,21 @@ public class MysqlConnector {
 
         try {
                 statement = connection.createStatement();
-                //executing statements the create the index table
                 statement.executeUpdate(createIndexTable);
                 statement.close();
         } catch (SQLException e) {
                 // TODO Auto-generated catch block
                 try {
 					statement.close();
-					System.out.println("Probably the table was created.");
+					System.out.println("This table already exist!");
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
         }
 	}
-	
+	//This function inserts a new row into the 'index File' table
 	public void insert(String word, int docNum, int freq) throws SQLException{
-		
 		PreparedStatement prepstate =connection.prepareStatement
                 ("INSERT INTO `indexFile` (`word`, `docNumber`, `freq`) "
                                 + "VALUES (?, ?, ?)");
@@ -61,8 +71,7 @@ public class MysqlConnector {
                 prepstate.close();
 	}
 	
-	
-
+	//This function is executed when we want to sord the 'index file' database tabl by the 'word' column
 	public void sortByWord() throws SQLException{
 	
 		statement = connection.createStatement();
@@ -72,23 +81,28 @@ public class MysqlConnector {
         statement.close();   
 	}
 	
-	
+	/* This function removes duplicate (word + document number) sets
+	 * Before deleting it sums the 'freq' column
+	 */
 	public void removeDuplicate() throws SQLException {
 		statement = connection.createStatement();
+		//Creating a temporary table that will store a table without duplicate rows.
 		statement.executeUpdate(
 				"CREATE temporary TABLE tsum AS"  
 				+"		SELECT word, docNumber, SUM(freq) as freq "
 				+"		FROM indexfile group by word, docNumber;"
 				);
-
+		//Clearing completely the 'index File' table
 		statement.executeUpdate("TRUNCATE TABLE indexFile;");
 		
+		//Inserting into the empty 'index file' table all rows from the temporary table
 		statement.executeUpdate(
 				"INSERT INTO indexFile (`word`,`docNumber`,`freq`)"
 				+"		SELECT word,docNumber,freq"
 				+"		FROM tsum;"
 				);
 		
+		//Deleting the temporary table we used
 		statement.executeUpdate(
 				"DROP TEMPORARY TABLE IF EXISTS tsum;"
 				);

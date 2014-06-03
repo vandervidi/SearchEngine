@@ -9,10 +9,10 @@ import java.util.List;
 
 
 public class FolderScanner implements Runnable{
+	private static final FolderScanner INSTANCE = new FolderScanner();
 	private  MysqlConnector ms;
 	
-
-	public FolderScanner() {
+	private FolderScanner() {
 		super();
 		ms = new MysqlConnector();
 	}
@@ -77,7 +77,7 @@ public class FolderScanner implements Runnable{
 
 /*This function does several things:
  * 1. Parses a text file
- * 2. Adds every word from the file to the Index file structure
+ * 2. Adds every word from the file to the 'Index file' table
  * 3. Sorts the Index file structure
  */
 	private void parseFile(File file, int docNum) {
@@ -109,8 +109,7 @@ public class FolderScanner implements Runnable{
 			tmpWord.trim();
 			if (!tmpWord.equals("")){	//Makes sure we dont add empty words to the index file
 
-				//if the word+docNumber does not exist
-				//insert into the mysql table
+				//Add this word to the database
 				try {
 					ms.insert(tmpWord, docNum , 1);
 				} catch (SQLException e) {
@@ -118,13 +117,9 @@ public class FolderScanner implements Runnable{
 					System.out.println("Error inserting ");
 					e.printStackTrace();
 				}
-//				if (blabla){
-//					
-//				}else{	// else increment frequency
-//					
-//				}
 			}
 		}
+		
 		//Sorting the index file by an alfabetic order
 		try {
 			ms.sortByWord();
@@ -139,7 +134,6 @@ public class FolderScanner implements Runnable{
 				}
 			e.printStackTrace();
 		}
-		
 		
 		//Removing duplicates from the index file
 		try {
@@ -156,40 +150,12 @@ public class FolderScanner implements Runnable{
 			e.printStackTrace();
 		}
 
-		
-		
-	}
-/*
-	private List<IndexFileElement> removeDuplicates(List<IndexFileElement> indexFile) {
-		List<IndexFileElement> tmpIndexFile = new ArrayList<IndexFileElement>();
-		boolean added = false;
-		for (int i=0; i<indexFile.size(); i++){
-			if (tmpIndexFile.isEmpty()==false){
-				for (int j=0; j<tmpIndexFile.size() ; j++){
-					added=false;
-						if ((indexFile.get(i).getM_word().equals(tmpIndexFile.get(j).getM_word())) && (indexFile.get(i).getM_docNum() == tmpIndexFile.get(j).getM_docNum())){
-							tmpIndexFile.get(j).setM_frequency(tmpIndexFile.get(j).getM_frequency() + indexFile.get(i).getM_frequency());
-							added=true;
-							break;
-						}
-					}
-				if (added==false){
-					tmpIndexFile.add(new IndexFileElement(indexFile.get(i).getM_word(), indexFile.get(i).getM_docNum() ,indexFile.get(i).getM_frequency() ));
-					
-
-				}
-			//inserting first element into tmpIndexFile
-			}else{
-				tmpIndexFile.add(new IndexFileElement(indexFile.get(i).getM_word(), indexFile.get(i).getM_docNum() ,indexFile.get(i).getM_frequency() ));
-			}
-		}
-	
-		return tmpIndexFile;
 	}
 
-
-*/	
-	
+	//Getters and setters
+	public static FolderScanner getInstance() {
+        return INSTANCE;
+    }
 	public MysqlConnector getMs() {
 		return ms;
 	}
