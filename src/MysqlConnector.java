@@ -117,4 +117,15 @@ public class MysqlConnector {
         statement.close();  
         System.out.println("close-statement");
 	}
+	
+	/* remove all the words from DB that corresponding to a file */
+	public void removeFileWords(int docNum) throws SQLException {
+		statement = connection.createStatement();
+		statement.executeUpdate(
+				"DELETE FROM indexFile "
+		        +"		WHERE docNumber ="+docNum+";"
+				);
+		statement.close();  
+        System.out.println("close-statement");
+	}
 }

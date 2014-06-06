@@ -58,8 +58,20 @@ public class FolderScanner implements Runnable{
 				    		File f = new File(postingFile.get(i).getM_path());
 				    		// if not valid -> Remove file from list
 				    		if (!f.exists()){
-					    		System.out.println("added - " + postingFile.get(postingFile.size()-1).getM_path() + " and its Document number is: "+postingFile.get(postingFile.size()-1).getM_docNum());
-				    			postingFile.remove(i);
+
+				    			System.out.println("remove - "+postingFile.get(i).getM_path() + "in index: "+postingFile.get(i).getM_docNum());
+					    		
+					    		//remove all words from DB that Attributed to this path file (by file number)
+					    		int docNum_toRemove = postingFile.get(i).getM_docNum();
+					    		try {
+									ms.removeFileWords(docNum_toRemove);
+								} catch (SQLException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+					    		
+					    		//remove
+					    		postingFile.remove(i);
 				    		}			    		
 				    	}
 			    	}
