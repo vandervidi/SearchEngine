@@ -56,8 +56,11 @@ public class MysqlConnector {
         } catch (SQLException e) {
                 // TODO Auto-generated catch block
                 try {
+                	//Clear the table that already exists
+            		statement.executeUpdate("TRUNCATE TABLE indexFile;");
+					System.out.println("This table already exist! Clearing the existing one...");
 					statement.close();
-					System.out.println("This table already exist!");
+					
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -118,14 +121,16 @@ public class MysqlConnector {
         System.out.println("close-statement");
 	}
 	
-	/* remove all the words from DB that corresponding to a file */
+	// remove all the words from DB that corresponding to a file 
 	public void removeFileWords(int docNum) throws SQLException {
 		statement = connection.createStatement();
 		statement.executeUpdate(
 				"DELETE FROM indexFile "
 		        +"		WHERE docNumber ="+docNum+";"
 				);
+        System.out.println("step 1/2 - removed all words from the database table ");
 		statement.close();  
         System.out.println("close-statement");
+		System.out.println("Removing completed");
 	}
 }

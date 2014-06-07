@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class FolderScanner implements Runnable{
 			    	// In case this is not the first file to be indexed
 			    	}else{
 			    		boolean exists = false;
-			    		// check if we indexed this file path before
+			    		// Check if we indexed this file path before
 			    		for (int i=0; i<postingFile.size(); i++){
 			    			// if file path exist
 					    	if (postingFile.get(i).getM_path().equals(file.getPath()) ){
@@ -46,7 +47,7 @@ public class FolderScanner implements Runnable{
 					    		break;
 					    	}
 			    		}
-			    		// if file does not exist -> Add file to list
+			    		// if the file does not exist , Add it to the list.
 			    		if (!exists){
 			    			postingFile.add(new PostingFileElement(file.getPath(), postingFile.size() ));
 				    		System.out.println("added - " + postingFile.get(postingFile.size()-1).getM_path() + " and its Document number is: "+postingFile.get(postingFile.size()-1).getM_docNum());
@@ -58,8 +59,6 @@ public class FolderScanner implements Runnable{
 				    		File f = new File(postingFile.get(i).getM_path());
 				    		// if not valid -> Remove file from list
 				    		if (!f.exists()){
-
-				    			System.out.println("remove - "+postingFile.get(i).getM_path() + "in index: "+postingFile.get(i).getM_docNum());
 					    		
 					    		//remove all words from DB that Attributed to this path file (by file number)
 					    		int docNum_toRemove = postingFile.get(i).getM_docNum();
@@ -70,12 +69,28 @@ public class FolderScanner implements Runnable{
 									e.printStackTrace();
 								}
 					    		
-					    		//remove
+					    		//remove the file path from the posting file
+				    			System.out.println("Step 2/2 - removed - "+postingFile.get(i).getM_path() + " from the posting file ,in index: "+postingFile.get(i).getM_docNum());
 					    		postingFile.remove(i);
+					    		
 				    		}			    		
 				    	}
 			    	}
 			    }
+			}
+			if (listOfFiles.length==0)
+			{
+			// Clear DB table
+				try {
+					Statement statement = ms.connection.createStatement();
+					statement.executeUpdate("TRUNCATE TABLE indexFile;");
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			// Clear Posting file
+				postingFile = new ArrayList();
 			}
 			
 			try {
